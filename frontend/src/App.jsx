@@ -1,0 +1,151 @@
+import React, { useState, useEffect } from 'react';
+import Sidebar from './components/Sidebar';
+import Login from './pages/Login';
+import Dashboard from './pages/Dashboard';
+import Vehicles from './pages/Vehicles';
+import Drivers from './pages/Drivers';
+import Trips from './pages/Trips';
+import Maintenance from './pages/Maintenance';
+import Expenses from './pages/Expenses';
+import Reports from './pages/Reports';
+import './index.css';
+
+function App() {
+    const [token, setToken] = useState(localStorage.getItem('transitops_token') || null);
+    const [user, setUser] = useState(null);
+    const [activeTab, setActiveTab] = useState('dashboard');
+    const [loadingApp, setLoadingApp] = useState(true);
+
+    // Validate session token / fetch profile on mount
+    useEffect(() => {
+        const loadProfile = async () => {
+            if (!token) {
+                setLoadingApp(false);
+                return;
+            }
+            try {
+                const response = await fetch('/api/auth/profile', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                if (response.ok) {
+                    const userData = await response.json();
+                    setUser(userData);
+
+                    // Set initial tab based on role if needed
+                    if (userData.role === 'Driver') {
+                        setActiveTab('trips');
+                    } else if (userData.role === 'Safety Officer') {
+                        setActiveTab('drivers');
+                    } else if (userData.role === 'Financial Analyst') {
+                        setActiveTab('expenses');
+                    } else {
+                        setActiveTab('dashboard');
+                    }
+                } else {
+                    // Token expired or invalid
+                    handleLogout();
+                }
+            } catch (err) {
+                console.error('App launch authentication check error:', err);
+            } finally {
+                setLoadingApp(false);
+            }
+        };
+
+        loadProfile();
+    }, [token]);
+
+    const handleLoginSuccess = ({ user, token }) => {
+        localStorage.setItem('transitops_token', token);
+        setToken(token);
+        setUser(user);
+
+        if (user.role === 'Driver') {
+            setActiveTab('trips');
+        } else if (user.role === 'Safety Officer') {
+            setActiveTab('drivers');
+        } else if (user.role === 'Financial Analyst') {
+            setActiveTab('expenses');
+        } else {
+            setActiveTab('dashboard');
+        }
+    };
+
+    const handleLogout = () => {
+        localStorage.removeItem('transitops_token');
+        setToken(null);
+        setUser(null);
+    };
+
+    if (loadingApp) {
+        return (
+            <div className="login-container">
+                <div style={{ color: '#fff', fontSize: '1.2rem', textShadow: '0 0 10px rgba(255,255,255,0.3)' }}>
+                    Bootstrapping TransitOps Cloud Client...
+                </div>
+            </div>
+        );
+    }
+
+    // If not authenticated, render Login page
+    if (!token || !user) {
+        return <Login onLoginSuccess={handleLoginSuccess} />;
+    }
+
+    // Render correct page client-side based on activeTab state
+    const renderContent = () => {
+        switch (activeTab) {
+            case 'dashboard':
+                return <Dashboard token={token} />;
+            case 'vehicles':
+                return <Vehicles token={token} />;
+            case 'drivers':
+                return <Drivers token={token} userRole={user.role} />;
+            case 'trips':
+                return <Trips token={token} />;
+            case 'maintenance':
+                return <Maintenance token={token} />;
+            case 'expenses':
+                return <Expenses token={token} />;
+            case 'reports':
+                return <Reports token={token} />;
+            default:
+                return <Dashboard token={token} />;
+        }
+    };
+
+    return (
+        <div className="app-container">
+            {/* Sidebar Navigation */}
+            <Sidebar
+                activeTab={activeTab}
+                setActiveTab={setActiveTab}
+                user={user}
+                onLogout={handleLogout}
+            />
+
+            {/* Main Panel Viewport */}
+            <main className="main-content-panel">
+                <header className="navbar-top">
+                    <div className="navbar-search">
+                        <span style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>📍 Smart Transport Operations System</span>
+                    </div>
+                    <div className="navbar-user-tag">
+                        <span className="dot dot-success animate-pulse"></span>
+                        <span style={{ fontSize: '0.85rem', fontWeight: '500' }}>
+                            Logged in as {user.name} ({user.role})
+                        </span>
+                    </div>
+                </header>
+
+                <div className="tab-viewport animate-fade-in">
+                    {renderContent()}
+                </div>
+            </main>
+        </div>
+    );
+}
+
+export default App;
