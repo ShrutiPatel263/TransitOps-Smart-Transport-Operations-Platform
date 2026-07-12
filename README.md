@@ -1,6 +1,6 @@
 # 🚛 TransitOps – Smart Transport Operations Platform
 
-> A full-stack Transport Operations Management System built for the **TransitOps Hackathon**. The platform digitizes fleet management, driver management, dispatch operations, maintenance tracking, fuel & expense management, and business analytics using secure Role-Based Access Control (RBAC).
+> A full-stack Transport Operations Management System that digitizes fleet management, driver management, dispatch operations, maintenance tracking, fuel & expense management, and business analytics using secure Role-Based Access Control (RBAC).
 
 ---
 
