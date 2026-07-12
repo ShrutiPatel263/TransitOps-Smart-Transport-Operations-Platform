@@ -175,7 +175,8 @@ body {
 }
 
 /* Main Content Layout */
-.main-content {
+.main-content,
+.main-content-panel {
     flex-grow: 1;
     margin-left: 260px;
     padding: 2.5rem;
@@ -183,7 +184,9 @@ body {
     display: flex;
     flex-direction: column;
     gap: 2rem;
+    overflow-x: hidden;
 }
+
 
 /* Dashboard Header */
 .dashboard-header {
