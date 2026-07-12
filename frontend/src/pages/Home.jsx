@@ -85,7 +85,7 @@ const steps = [
 
 /* ───── Role cards ───── */
 const roles = [
-    { icon: '🏢', role: 'Fleet Manager', color: '#818cf8', desc: 'Full access to every module — CRUD tools, dispatches, reports, maintenance.' },
+    { icon: '🏢', role: 'Fleet Manager', color: '#818cf8', desc: 'Manage vehicles, maintenance, and fleet reports — without trip dispatch or expense control.' },
     { icon: '🚘', role: 'Driver', color: '#34d399', desc: 'Monitor assigned trips, trigger completions, and review your own schedule.' },
     { icon: '🛡️', role: 'Safety Officer', color: '#fbbf24', desc: 'Inspect licence status, adjust safety scores, and resolve compliance issues.' },
     { icon: '💹', role: 'Financial Analyst', color: '#22d3ee', desc: 'Dive into expense ledgers, fuel efficiency data, and ROI breakdowns.' },

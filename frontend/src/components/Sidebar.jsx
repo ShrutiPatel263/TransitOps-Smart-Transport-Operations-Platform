@@ -5,10 +5,13 @@ const Sidebar = ({ activeTab, setActiveTab, user, onLogout }) => {
     const menuItems = [
         { id: 'dashboard', name: 'Dashboard', icon: '📊', roles: ['Fleet Manager', 'Driver', 'Safety Officer', 'Financial Analyst'] },
         { id: 'vehicles', name: 'Vehicles', icon: '🚚', roles: ['Fleet Manager'] },
-        { id: 'drivers', name: 'Drivers', icon: '👤', roles: ['Fleet Manager', 'Safety Officer'] },
-        { id: 'trips', name: 'Trip Dispatch', icon: '🗺️', roles: ['Fleet Manager', 'Driver'] },
+        { id: 'drivers', name: 'Drivers', icon: '👤', roles: ['Safety Officer'] },
+        { id: 'trips-manage', name: 'Trip Management', icon: '🗺️', roles: ['Driver'] },
+        { id: 'trips-dispatch', name: 'Dispatch', icon: '🚚', roles: ['Driver'] },
+        { id: 'trips-active', name: 'Active Trips', icon: '✅', roles: ['Driver'] },
+        { id: 'trips-history', name: 'Trip History', icon: '📜', roles: ['Driver'] },
         { id: 'maintenance', name: 'Maintenance', icon: '🔧', roles: ['Fleet Manager'] },
-        { id: 'expenses', name: 'Fuel & Expenses', icon: '💳', roles: ['Fleet Manager', 'Financial Analyst'] },
+        { id: 'expenses', name: 'Fuel & Expenses', icon: '💳', roles: ['Financial Analyst'] },
         { id: 'reports', name: 'Reports & ROI', icon: '📈', roles: ['Fleet Manager', 'Financial Analyst'] },
     ];
 

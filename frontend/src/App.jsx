@@ -137,6 +137,11 @@ function App() {
 
     // Render correct page client-side based on activeTab state for authenticated users
     const renderContent = () => {
+        const fleetManagerAllowedTabs = ['dashboard', 'vehicles', 'maintenance', 'reports'];
+        if (user.role === 'Fleet Manager' && !fleetManagerAllowedTabs.includes(activeTab)) {
+            return <Dashboard token={token} />;
+        }
+
         switch (activeTab) {
             case 'dashboard':
                 return <Dashboard token={token} />;
@@ -144,8 +149,14 @@ function App() {
                 return <Vehicles token={token} />;
             case 'drivers':
                 return <Drivers token={token} userRole={user.role} />;
-            case 'trips':
-                return <Trips token={token} />;
+            case 'trips-manage':
+                return <Trips token={token} initialView="manage" />;
+            case 'trips-dispatch':
+                return <Trips token={token} initialView="dispatch" />;
+            case 'trips-active':
+                return <Trips token={token} initialView="active" />;
+            case 'trips-history':
+                return <Trips token={token} initialView="history" />;
             case 'maintenance':
                 return <Maintenance token={token} />;
             case 'expenses':

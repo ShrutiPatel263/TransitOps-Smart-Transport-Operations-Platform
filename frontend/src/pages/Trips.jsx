@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-const Trips = ({ token }) => {
+const Trips = ({ token, initialView = 'manage' }) => {
     const [trips, setTrips] = useState([]);
     const [vehicles, setVehicles] = useState([]);
     const [drivers, setDrivers] = useState([]);
@@ -10,6 +10,7 @@ const Trips = ({ token }) => {
 
     // Trip Creation Form State
     const [showCreateModal, setShowCreateModal] = useState(false);
+    const [viewMode, setViewMode] = useState(initialView);
     const [source, setSource] = useState('');
     const [destination, setDestination] = useState('');
     const [selectedVehicle, setSelectedVehicle] = useState('');
@@ -56,6 +57,13 @@ const Trips = ({ token }) => {
     useEffect(() => {
         fetchTripsAndAssets();
     }, []);
+
+    // Open create modal when navigating directly to Dispatch view
+    useEffect(() => {
+        if (viewMode === 'dispatch') {
+            setShowCreateModal(true);
+        }
+    }, [viewMode]);
 
     // Filter out retired, in-shop, or already on-trip vehicles for selection
     const availableVehiclesForDispatch = vehicles.filter(v => v.status === 'Available');
@@ -255,6 +263,13 @@ const Trips = ({ token }) => {
 
     return (
         <div>
+            <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem', alignItems: 'center' }}>
+                <div style={{ fontWeight: 700, color: 'var(--text-secondary)', marginRight: '0.5rem' }}>View:</div>
+                <button className={`btn ${viewMode === 'manage' ? 'btn-primary' : 'btn-ghost'}`} onClick={() => setViewMode('manage')}>Trip Management</button>
+                <button className={`btn ${viewMode === 'dispatch' ? 'btn-primary' : 'btn-ghost'}`} onClick={() => setViewMode('dispatch')}>Dispatch</button>
+                <button className={`btn ${viewMode === 'active' ? 'btn-primary' : 'btn-ghost'}`} onClick={() => setViewMode('active')}>Active Trips</button>
+                <button className={`btn ${viewMode === 'history' ? 'btn-primary' : 'btn-ghost'}`} onClick={() => setViewMode('history')}>Trip History</button>
+            </div>
             <div className="dashboard-header">
                 <div className="header-title">
                     <h1>Trip Dispatch Board</h1>
@@ -278,55 +293,56 @@ const Trips = ({ token }) => {
                 </div>
             ) : (
                 <div className="trip-board">
-
-                    {/* Draft Column */}
-                    <div className="board-col">
-                        <div className="col-header">
-                            <span>📁 Drafts</span>
-                            <span className="col-count">{draftTrips.length}</span>
+                    {viewMode === 'manage' && (
+                        <div className="board-col">
+                            <div className="col-header">
+                                <span>📁 Drafts</span>
+                                <span className="col-count">{draftTrips.length}</span>
+                            </div>
+                            {draftTrips.length === 0 ? (
+                                <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', textAlign: 'center', padding: '1rem' }}>No drafts.</div>
+                            ) : draftTrips.map(renderTripCard)}
                         </div>
-                        {draftTrips.length === 0 ? (
-                            <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', textAlign: 'center', padding: '1rem' }}>No drafts.</div>
-                        ) : draftTrips.map(renderTripCard)}
-                    </div>
+                    )}
 
-                    {/* Dispatched Column */}
-                    <div className="board-col">
-                        <div className="col-header">
-                            <span>🚀 Dispatched / Active</span>
-                            <span className="col-count" style={{ color: '#818cf8' }}>{dispatchedTrips.length}</span>
+                    {(viewMode === 'manage' || viewMode === 'active') && (
+                        <div className="board-col">
+                            <div className="col-header">
+                                <span>🚀 Dispatched / Active</span>
+                                <span className="col-count" style={{ color: '#818cf8' }}>{dispatchedTrips.length}</span>
+                            </div>
+                            {dispatchedTrips.length === 0 ? (
+                                <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', textAlign: 'center', padding: '1rem' }}>No active trips.</div>
+                            ) : dispatchedTrips.map(renderTripCard)}
                         </div>
-                        {dispatchedTrips.length === 0 ? (
-                            <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', textAlign: 'center', padding: '1rem' }}>No active trips.</div>
-                        ) : dispatchedTrips.map(renderTripCard)}
-                    </div>
+                    )}
 
-                    {/* Completed Column */}
-                    <div className="board-col">
-                        <div className="col-header">
-                            <span>✅ Completed</span>
-                            <span className="col-count" style={{ color: '#34d399' }}>{completedTrips.length}</span>
-                        </div>
-                        {completedTrips.length === 0 ? (
-                            <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', textAlign: 'center', padding: '1rem' }}>No completed trips.</div>
-                        ) : completedTrips.map(renderTripCard)}
-                    </div>
+                    {(viewMode === 'manage' || viewMode === 'history') && (
+                        <>
+                            <div className="board-col">
+                                <div className="col-header">
+                                    <span>✅ Completed</span>
+                                    <span className="col-count" style={{ color: '#34d399' }}>{completedTrips.length}</span>
+                                </div>
+                                {completedTrips.length === 0 ? (
+                                    <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', textAlign: 'center', padding: '1rem' }}>No completed trips.</div>
+                                ) : completedTrips.map(renderTripCard)}
+                            </div>
 
-                    {/* Cancelled Column */}
-                    <div className="board-col">
-                        <div className="col-header">
-                            <span>❌ Cancelled</span>
-                            <span className="col-count" style={{ color: '#f87171' }}>{cancelledTrips.length}</span>
-                        </div>
-                        {cancelledTrips.length === 0 ? (
-                            <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', textAlign: 'center', padding: '1rem' }}>No cancelled trips.</div>
-                        ) : cancelledTrips.map(renderTripCard)}
-                    </div>
-
+                            <div className="board-col">
+                                <div className="col-header">
+                                    <span>❌ Cancelled</span>
+                                    <span className="col-count" style={{ color: '#f87171' }}>{cancelledTrips.length}</span>
+                                </div>
+                                {cancelledTrips.length === 0 ? (
+                                    <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', textAlign: 'center', padding: '1rem' }}>No cancelled trips.</div>
+                                ) : cancelledTrips.map(renderTripCard)}
+                            </div>
+                        </>
+                    )}
                 </div>
             )}
 
-            {/* Creation Modal */}
             {showCreateModal && (
                 <div className="modal-overlay">
                     <div className="modal-content">
