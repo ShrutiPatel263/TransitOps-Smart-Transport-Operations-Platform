@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Sidebar from './components/Sidebar';
+import Home from './pages/Home';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import Vehicles from './pages/Vehicles';
@@ -15,6 +16,9 @@ function App() {
     const [user, setUser] = useState(null);
     const [activeTab, setActiveTab] = useState('dashboard');
     const [loadingApp, setLoadingApp] = useState(true);
+
+    // Unauthenticated view routing: 'home', 'login', or 'signup'
+    const [view, setView] = useState('home');
 
     // Validate session token / fetch profile on mount
     useEffect(() => {
@@ -33,7 +37,7 @@ function App() {
                     const userData = await response.json();
                     setUser(userData);
 
-                    // Set initial tab based on role if needed
+                    // Set initial tab based on role
                     if (userData.role === 'Driver') {
                         setActiveTab('trips');
                     } else if (userData.role === 'Safety Officer') {
@@ -77,6 +81,7 @@ function App() {
         localStorage.removeItem('transitops_token');
         setToken(null);
         setUser(null);
+        setView('home');
     };
 
     if (loadingApp) {
@@ -89,12 +94,30 @@ function App() {
         );
     }
 
-    // If not authenticated, render Login page
+    // If not authenticated, render Home or Login/Signup based on current view state
     if (!token || !user) {
-        return <Login onLoginSuccess={handleLoginSuccess} />;
+        if (view === 'login') {
+            return (
+                <Login
+                    initialMode="login"
+                    onLoginSuccess={handleLoginSuccess}
+                    onBackToHome={() => setView('home')}
+                />
+            );
+        }
+        if (view === 'signup') {
+            return (
+                <Login
+                    initialMode="signup"
+                    onLoginSuccess={handleLoginSuccess}
+                    onBackToHome={() => setView('home')}
+                />
+            );
+        }
+        return <Home onNavigate={(target) => setView(target)} />;
     }
 
-    // Render correct page client-side based on activeTab state
+    // Render correct page client-side based on activeTab state for authenticated users
     const renderContent = () => {
         switch (activeTab) {
             case 'dashboard':
