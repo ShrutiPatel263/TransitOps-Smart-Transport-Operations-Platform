@@ -59,19 +59,36 @@ body {
 }
 
 .light-mode {
-    --bg-primary: #f4f7fb;
+    --bg-primary: #f0f4ff;
     --bg-secondary: #ffffff;
-    --card-bg: rgba(255, 255, 255, 0.96);
-    --card-border: rgba(148, 163, 184, 0.25);
-    --glass-border: rgba(148, 163, 184, 0.22);
-    --glass-bg: rgba(255, 255, 255, 0.92);
-    --glass-shadow: 0 18px 50px 0 rgba(15, 23, 42, 0.08);
+    --card-bg: rgba(255, 255, 255, 0.98);
+    --card-border: rgba(99, 102, 241, 0.14);
 
-    --text-primary: #102a43;
-    --text-secondary: #334e68;
-    --text-muted: #627d98;
+    --primary: #4f46e5;
+    --primary-hover: #4338ca;
+    --primary-glow: rgba(79, 70, 229, 0.12);
 
-    background-color: #f4f7fb;
+    --success: #059669;
+    --success-glow: rgba(5, 150, 105, 0.12);
+
+    --warning: #d97706;
+    --warning-glow: rgba(217, 119, 6, 0.12);
+
+    --danger: #dc2626;
+    --danger-glow: rgba(220, 38, 38, 0.12);
+
+    --info: #0284c7;
+    --info-glow: rgba(2, 132, 199, 0.12);
+
+    --text-primary: #0f172a;
+    --text-secondary: #334155;
+    --text-muted: #64748b;
+
+    --glass-border: rgba(99, 102, 241, 0.16);
+    --glass-bg: rgba(255, 255, 255, 0.93);
+    --glass-shadow: 0 4px 24px rgba(79, 70, 229, 0.08), 0 1px 4px rgba(0, 0, 0, 0.04);
+
+    background-color: #f0f4ff;
 }
 
 .light-mode .landing-page-root {
@@ -1805,4 +1822,303 @@ body {
 
 .auth-tab:hover {
     color: #fff;
+}
+
+/* ═══════════════════════════════════════════════════════
+   LIGHT MODE — APP UI OVERRIDES (authenticated pages)
+═══════════════════════════════════════════════════════ */
+
+/* Body gradient for light mode */
+.light-mode body {
+    background-image:
+        radial-gradient(at 10% 20%, rgba(79, 70, 229, 0.07) 0px, transparent 50%),
+        radial-gradient(at 90% 80%, rgba(99, 102, 241, 0.06) 0px, transparent 50%);
+}
+
+/* Sidebar */
+.light-mode .sidebar {
+    background: rgba(255, 255, 255, 0.97);
+    border-right-color: rgba(99, 102, 241, 0.13);
+    box-shadow: 4px 0 24px rgba(79, 70, 229, 0.06);
+}
+
+.light-mode .sidebar-brand {
+    color: #0f172a;
+}
+
+.light-mode .sidebar-link {
+    color: #475569;
+}
+
+.light-mode .sidebar-link:hover {
+    background: rgba(79, 70, 229, 0.07);
+    color: #4f46e5;
+}
+
+.light-mode .sidebar-link.active {
+    background: rgba(79, 70, 229, 0.11);
+    border-color: rgba(79, 70, 229, 0.25);
+    color: #4338ca;
+}
+
+.light-mode .sidebar-user {
+    border-top-color: rgba(99, 102, 241, 0.13);
+}
+
+/* Glass cards */
+.light-mode .glass-card {
+    background: rgba(255, 255, 255, 0.95);
+    border-color: rgba(99, 102, 241, 0.13);
+    box-shadow: 0 2px 16px rgba(79, 70, 229, 0.07), 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.light-mode .glass-card:hover {
+    border-color: rgba(79, 70, 229, 0.25);
+    box-shadow: 0 8px 32px rgba(79, 70, 229, 0.10), 0 2px 8px rgba(0, 0, 0, 0.05);
+    transform: translateY(-2px);
+}
+
+/* KPI icon wrappers */
+.light-mode .color-primary {
+    background: rgba(79, 70, 229, 0.1);
+    color: #4f46e5;
+    border-color: rgba(79, 70, 229, 0.22);
+}
+
+.light-mode .color-success {
+    background: rgba(5, 150, 105, 0.1);
+    color: #059669;
+    border-color: rgba(5, 150, 105, 0.22);
+}
+
+.light-mode .color-warning {
+    background: rgba(217, 119, 6, 0.1);
+    color: #b45309;
+    border-color: rgba(217, 119, 6, 0.22);
+}
+
+.light-mode .color-danger {
+    background: rgba(220, 38, 38, 0.09);
+    color: #dc2626;
+    border-color: rgba(220, 38, 38, 0.2);
+}
+
+.light-mode .color-info {
+    background: rgba(2, 132, 199, 0.09);
+    color: #0284c7;
+    border-color: rgba(2, 132, 199, 0.2);
+}
+
+/* Buttons */
+.light-mode .btn-secondary {
+    background: rgba(79, 70, 229, 0.06);
+    border-color: rgba(99, 102, 241, 0.22);
+    color: #334155;
+}
+
+.light-mode .btn-secondary:hover {
+    background: rgba(79, 70, 229, 0.1);
+    color: #1e293b;
+}
+
+/* Form controls */
+.light-mode .form-control {
+    background: rgba(248, 250, 255, 0.9);
+    border-color: rgba(99, 102, 241, 0.22);
+    color: #0f172a;
+}
+
+.light-mode .form-control:focus {
+    border-color: #4f46e5;
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+}
+
+.light-mode .form-control option {
+    background: #ffffff;
+    color: #0f172a;
+}
+
+.light-mode .form-group label {
+    color: #475569;
+}
+
+/* Tables */
+.light-mode .custom-table th {
+    color: #475569;
+    border-bottom-color: rgba(99, 102, 241, 0.14);
+}
+
+.light-mode .custom-table td {
+    border-bottom-color: rgba(203, 213, 225, 0.45);
+    color: #1e293b;
+}
+
+.light-mode .custom-table td:first-child {
+    color: #0f172a;
+}
+
+.light-mode .custom-table tr:hover td {
+    background: rgba(79, 70, 229, 0.03);
+}
+
+/* Badges */
+.light-mode .badge-available {
+    background: rgba(5, 150, 105, 0.1);
+    color: #047857;
+    border-color: rgba(5, 150, 105, 0.25);
+}
+
+.light-mode .badge-ontrip {
+    background: rgba(79, 70, 229, 0.1);
+    color: #4338ca;
+    border-color: rgba(79, 70, 229, 0.25);
+}
+
+.light-mode .badge-inshop {
+    background: rgba(217, 119, 6, 0.1);
+    color: #92400e;
+    border-color: rgba(217, 119, 6, 0.25);
+}
+
+.light-mode .badge-retired {
+    background: rgba(220, 38, 38, 0.08);
+    color: #b91c1c;
+    border-color: rgba(220, 38, 38, 0.2);
+}
+
+.light-mode .badge-suspended {
+    background: rgba(220, 38, 38, 0.08);
+    color: #b91c1c;
+    border-color: rgba(220, 38, 38, 0.2);
+}
+
+.light-mode .badge-offduty {
+    background: rgba(100, 116, 139, 0.08);
+    color: #475569;
+    border-color: rgba(100, 116, 139, 0.2);
+}
+
+/* Modals */
+.light-mode .modal-overlay {
+    background: rgba(15, 23, 42, 0.45);
+}
+
+.light-mode .modal-content {
+    background: #ffffff;
+    border-color: rgba(99, 102, 241, 0.16);
+    box-shadow: 0 24px 60px rgba(79, 70, 229, 0.12), 0 4px 16px rgba(0, 0, 0, 0.08);
+}
+
+.light-mode .modal-header h3 {
+    color: #0f172a;
+}
+
+.light-mode .modal-close {
+    color: #64748b;
+}
+
+.light-mode .modal-close:hover {
+    color: #0f172a;
+}
+
+/* Alerts */
+.light-mode .alert-danger {
+    background: rgba(220, 38, 38, 0.07);
+    color: #b91c1c;
+    border-color: rgba(220, 38, 38, 0.2);
+}
+
+.light-mode .alert-success {
+    background: rgba(5, 150, 105, 0.07);
+    color: #065f46;
+    border-color: rgba(5, 150, 105, 0.2);
+}
+
+/* Bar chart track */
+.light-mode .bar-track {
+    background: rgba(99, 102, 241, 0.09);
+}
+
+.light-mode .bar-label {
+    color: #475569;
+}
+
+.light-mode .bar-value {
+    color: #334155;
+}
+
+/* Compliance items */
+.light-mode .compliance-item {
+    background: rgba(79, 70, 229, 0.04);
+    border-color: rgba(99, 102, 241, 0.14);
+}
+
+.light-mode .compliance-status {
+    color: #b91c1c;
+}
+
+/* Trip board cards */
+.light-mode .board-col {
+    background: rgba(79, 70, 229, 0.04);
+    border-color: rgba(99, 102, 241, 0.14);
+}
+
+.light-mode .trip-card {
+    background: rgba(255, 255, 255, 0.9);
+    border-color: rgba(99, 102, 241, 0.14);
+}
+
+.light-mode .trip-card:hover {
+    background: rgba(255, 255, 255, 1);
+    border-color: rgba(79, 70, 229, 0.28);
+    box-shadow: 0 4px 16px rgba(79, 70, 229, 0.08);
+}
+
+.light-mode .col-count {
+    background: rgba(79, 70, 229, 0.1);
+    color: #4338ca;
+}
+
+.light-mode .col-header {
+    color: #475569;
+    border-bottom-color: rgba(99, 102, 241, 0.14);
+}
+
+/* Dashboard header */
+.light-mode .header-title h1 {
+    color: #0f172a;
+}
+
+.light-mode .header-title p {
+    color: #475569;
+}
+
+/* Navbar top */
+.light-mode .navbar-top {
+    border-bottom: 1px solid rgba(99, 102, 241, 0.1);
+}
+
+.light-mode .theme-toggle-button {
+    border-color: rgba(99, 102, 241, 0.22);
+    background: rgba(79, 70, 229, 0.07);
+    color: #334155;
+}
+
+.light-mode .theme-toggle-button:hover {
+    background: rgba(79, 70, 229, 0.13);
+    color: #1e293b;
+}
+
+/* Auth tabs (login page) */
+.light-mode .auth-tab {
+    color: #475569;
+}
+
+.light-mode .auth-tab.active {
+    color: #4f46e5;
+    border-color: #4f46e5;
+}
+
+.light-mode .auth-tab:hover {
+    color: #1e293b;
 }

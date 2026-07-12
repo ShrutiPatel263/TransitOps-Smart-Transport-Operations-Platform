@@ -78,22 +78,43 @@ const Vehicles = ({ token }) => {
 
     const handleFormSubmit = async (e) => {
         e.preventDefault();
-        if (!regNum || !model || !maxCapacity || !acquisitionCost || (modalMode === 'Create' && odometer === '')) {
-            setFormError('Please fill in all mandatory fields.');
-            return;
+
+        // Mode-specific validation — only check editable/required fields per mode
+        if (modalMode === 'Create') {
+            if (!regNum.trim() || !model.trim() || Number(maxCapacity) <= 0 || Number(acquisitionCost) <= 0 || odometer === '') {
+                setFormError('Please fill in all mandatory fields with valid values.');
+                return;
+            }
+        } else {
+            // In Edit mode, registrationNumber and odometer are disabled — don't validate them
+            if (!model.trim() || Number(maxCapacity) <= 0 || Number(acquisitionCost) <= 0) {
+                setFormError('Please fill in all mandatory fields with valid values.');
+                return;
+            }
         }
 
         try {
             setFormError('');
-            const payload = {
-                registrationNumber: regNum,
-                model,
-                type,
-                maxCapacity: Number(maxCapacity),
-                odometer: Number(odometer),
-                acquisitionCost: Number(acquisitionCost),
-                status
-            };
+
+            // Build mode-specific payload:
+            // Edit mode only sends editable fields — NOT the disabled registrationNumber or odometer
+            // This prevents accidental overwrite and avoids NaN/validation errors from disabled inputs
+            const payload = modalMode === 'Create'
+                ? {
+                    registrationNumber: regNum.trim(),
+                    model: model.trim(),
+                    type,
+                    maxCapacity: Number(maxCapacity),
+                    odometer: Number(odometer),
+                    acquisitionCost: Number(acquisitionCost)
+                }
+                : {
+                    model: model.trim(),
+                    type,
+                    maxCapacity: Number(maxCapacity),
+                    acquisitionCost: Number(acquisitionCost),
+                    status
+                };
 
             const url = modalMode === 'Create' ? '/api/vehicles' : `/api/vehicles/${targetId}`;
             const method = modalMode === 'Create' ? 'POST' : 'PUT';
@@ -261,7 +282,7 @@ const Vehicles = ({ token }) => {
                             </div>
                         )}
 
-                        <form onSubmit={handleFormSubmit}>
+                        <form onSubmit={handleFormSubmit} noValidate>
                             <div className="grid-cols-2">
                                 <div className="form-group">
                                     <label>Registration Number *</label>

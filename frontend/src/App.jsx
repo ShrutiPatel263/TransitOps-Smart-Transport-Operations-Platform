@@ -190,13 +190,6 @@ function App() {
                     <div className="navbar-search">
                         <span style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>📍 Smart Transport Operations System</span>
                     </div>
-                    <button
-                        className="theme-toggle-button"
-                        onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
-                        type="button"
-                    >
-                        {theme === 'light' ? '🌙 Dark Mode' : '☀️ Light Mode'}
-                    </button>
                     <div className="navbar-user-tag">
                         <span className="dot dot-success animate-pulse"></span>
                         <span style={{ fontSize: '0.85rem', fontWeight: '500' }}>
