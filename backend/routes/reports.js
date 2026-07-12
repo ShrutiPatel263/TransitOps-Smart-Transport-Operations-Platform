@@ -49,6 +49,85 @@ router.get('/kpis', protect, async (req, res) => {
                 fleetUtilization: 0
             });
         }
+        
+        // Financial Analyst KPIs
+        if (userRole === 'Financial Analyst') {
+            const vehicles = await Vehicle.find({ status: { $ne: 'Retired' } });
+            let totalFuelCost = 0;
+            let maintenanceCost = 0;
+            let operationalCost = 0;
+            let totalExpenses = 0;
+            let totalRevenue = 0;
+            let totalDistance = 0;
+            let totalFuelConsumed = 0;
+            let roiSum = 0;
+            let roiCount = 0;
+
+            for (const vehicle of vehicles) {
+                const expenses = await Expense.find({ vehicle: vehicle._id });
+                let vehicleFuel = 0;
+                let vehicleMaint = 0;
+                let vehicleOther = 0;
+                let vehicleLiters = 0;
+
+                expenses.forEach(exp => {
+                    if (exp.category === 'Fuel') {
+                        vehicleFuel += exp.cost;
+                        if (exp.liters) vehicleLiters += exp.liters;
+                    } else if (exp.category === 'Maintenance') {
+                        vehicleMaint += exp.cost;
+                    } else {
+                        vehicleOther += exp.cost;
+                    }
+                });
+
+                const vehicleTotalExpenses = vehicleFuel + vehicleMaint + vehicleOther;
+                totalFuelCost += vehicleFuel;
+                maintenanceCost += vehicleMaint;
+                operationalCost += vehicleOther;
+                totalExpenses += vehicleTotalExpenses;
+
+                const completedTrips = await Trip.find({
+                    vehicle: vehicle._id,
+                    status: 'Completed'
+                });
+
+                let vehicleRevenue = 0;
+                let vehicleDistance = 0;
+                let vehicleTripFuel = 0;
+
+                completedTrips.forEach(trip => {
+                    vehicleRevenue += trip.revenue || 0;
+                    vehicleDistance += trip.distance || 0;
+                    if (trip.fuelConsumed) vehicleTripFuel += trip.fuelConsumed;
+                });
+
+                totalRevenue += vehicleRevenue;
+                totalDistance += vehicleDistance;
+                totalFuelConsumed += (vehicleTripFuel || vehicleLiters);
+
+                const roiNumerator = vehicleRevenue - vehicleTotalExpenses;
+                const roi = vehicle.acquisitionCost > 0
+                    ? roiNumerator / vehicle.acquisitionCost
+                    : 0;
+
+                roiSum += roi;
+                roiCount++;
+            }
+
+            const averageVehicleRoi = roiCount > 0 ? (roiSum / roiCount) : 0;
+            const globalFuelEfficiency = totalFuelConsumed > 0 ? (totalDistance / totalFuelConsumed) : 0;
+
+            return res.json({
+                totalFuelCost,
+                operationalCost,
+                maintenanceCost,
+                vehicleRoi: averageVehicleRoi,
+                fuelEfficiency: globalFuelEfficiency,
+                totalExpenses,
+                totalRevenue
+            });
+        }
 
         // Fleet Manager / Default KPIs
         let vehicleQuery = {};
