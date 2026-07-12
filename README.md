@@ -392,4 +392,5 @@ JWT_SECRET=your_secret_key
 
 # 👨‍💻 Team
 
+Shruti Patel
 Developed with ❤️ during the **TransitOps Smart Transport Operations Platform**.
