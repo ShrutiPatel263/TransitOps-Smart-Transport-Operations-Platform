@@ -11,10 +11,48 @@ const router = express.Router();
 // @access  Private
 router.get('/kpis', protect, async (req, res) => {
     try {
-        const { type, region } = req.query; // If filters are passed (simple stub or match)
+        const { type, region } = req.query;
+        const userRole = req.user.role;
+
+        // Safety Officer KPIs
+        if (userRole === 'Safety Officer') {
+            const totalDrivers = await Driver.countDocuments();
+            const availableDrivers = await Driver.countDocuments({ status: 'Available' });
+            const driversOnTrip = await Driver.countDocuments({ status: 'On Trip' });
+            const suspendedDrivers = await Driver.countDocuments({ status: 'Suspended' });
+
+            // Count expired licenses
+            const expiredLicenses = await Driver.countDocuments({
+                licenseExpiryDate: { $lt: new Date() }
+            });
+
+            // Calculate average safety score
+            const drivers = await Driver.find();
+            const averageSafetyScore = drivers.length > 0
+                ? drivers.reduce((sum, d) => sum + (d.safetyScore || 0), 0) / drivers.length
+                : 0;
+
+            return res.json({
+                totalDrivers,
+                availableDrivers,
+                driversOnTrip,
+                expiredLicenses,
+                suspendedDrivers,
+                averageSafetyScore,
+                // Include default fleet metrics too for consistency
+                activeVehicles: 0,
+                availableVehicles: 0,
+                inShopVehicles: 0,
+                activeTrips: 0,
+                pendingTrips: 0,
+                driversOnDuty: 0,
+                fleetUtilization: 0
+            });
+        }
+
+        // Fleet Manager / Default KPIs
         let vehicleQuery = {};
         if (type) vehicleQuery.type = type;
-        // region could be matched online if added to schemas. We support it by matching model or just simple filters.
 
         const vehicles = await Vehicle.find(vehicleQuery);
 
@@ -39,7 +77,6 @@ router.get('/kpis', protect, async (req, res) => {
         });
 
         // Fleet utilization %
-        // Formula: (Active / Total Non-Retired) * 100
         const totalActiveVehicles = activeVehicles + availableVehicles + inShopVehicles;
         const utilization = totalActiveVehicles > 0
             ? Math.round((activeVehicles / totalActiveVehicles) * 100)
@@ -53,7 +90,13 @@ router.get('/kpis', protect, async (req, res) => {
             activeTrips,
             pendingTrips,
             driversOnDuty,
-            fleetUtilization: utilization
+            fleetUtilization: utilization,
+            totalDrivers: 0,
+            availableDrivers: 0,
+            driversOnTrip: 0,
+            expiredLicenses: 0,
+            suspendedDrivers: 0,
+            averageSafetyScore: 0
         });
     } catch (error) {
         res.status(500).json({ message: error.message });

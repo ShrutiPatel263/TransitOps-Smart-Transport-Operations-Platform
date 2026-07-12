@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 
-const Drivers = ({ token, userRole }) => {
+const Drivers = ({ token, userRole, initialView = 'manage' }) => {
     const [drivers, setDrivers] = useState([]);
     const [search, setSearch] = useState('');
     const [filterStatus, setFilterStatus] = useState('');
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
-
+    const [viewMode, setViewMode] = useState(initialView);
     // Form Modal States
     const [showModal, setShowModal] = useState(false);
     const [modalMode, setModalMode] = useState('Create');
@@ -145,10 +145,28 @@ const Drivers = ({ token, userRole }) => {
 
     return (
         <div>
+            {/* Slidebar for Safety Officer */}
+            {userRole === 'Safety Officer' && (
+                <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem', alignItems: 'center' }}>
+                    <div style={{ fontWeight: 700, color: 'var(--text-secondary)', marginRight: '0.5rem' }}>View:</div>
+                    <button className={`btn ${viewMode === 'manage' ? 'btn-primary' : 'btn-ghost'}`} onClick={() => setViewMode('manage')}>Driver Management</button>
+                    <button className={`btn ${viewMode === 'license' ? 'btn-primary' : 'btn-ghost'}`} onClick={() => setViewMode('license')}>License Tracking</button>
+                    <button className={`btn ${viewMode === 'safety' ? 'btn-primary' : 'btn-ghost'}`} onClick={() => setViewMode('safety')}>Safety Reports</button>
+                </div>
+            )}
+
             <div className="dashboard-header">
                 <div className="header-title">
-                    <h1>Driver Management</h1>
-                    <p>Configure driver compliance registry and monitoring safety scores</p>
+                    <h1>
+                        {viewMode === 'manage' && 'Driver Management'}
+                        {viewMode === 'license' && 'License Tracking'}
+                        {viewMode === 'safety' && 'Safety Reports'}
+                    </h1>
+                    <p>
+                        {viewMode === 'manage' && 'Configure driver compliance registry and monitoring safety scores'}
+                        {viewMode === 'license' && 'Monitor driver license expiration and renewal status'}
+                        {viewMode === 'safety' && 'Track driver safety scores, incidents, and compliance warnings'}
+                    </p>
                 </div>
                 <button className="btn btn-primary" onClick={openCreateModal}>
                     ➕ Add Driver Profile
@@ -171,25 +189,48 @@ const Drivers = ({ token, userRole }) => {
                             <input
                                 type="text"
                                 className="form-control"
-                                placeholder="Search by Name or License..."
+                                placeholder={viewMode === 'license' ? 'Search by Name or License...' : viewMode === 'safety' ? 'Search by Name or Safety Score...' : 'Search by Name or License...'}
                                 value={search}
                                 onChange={(e) => setSearch(e.target.value)}
                             />
                         </div>
 
                         <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
-                            <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Status:</span>
+                            <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+                                {viewMode === 'license' ? 'License Status:' : viewMode === 'safety' ? 'Safety Status:' : 'Status:'}
+                            </span>
                             <select
                                 className="form-control"
                                 style={{ width: '130px', padding: '0.4rem' }}
                                 value={filterStatus}
                                 onChange={(e) => setFilterStatus(e.target.value)}
                             >
-                                <option value="">All Statuses</option>
-                                <option value="Available">Available</option>
-                                <option value="On Trip">On Trip</option>
-                                <option value="Off Duty">Off Duty</option>
-                                <option value="Suspended">Suspended</option>
+                                {viewMode === 'license' && (
+                                    <>
+                                        <option value="">All Licenses</option>
+                                        <option value="Active">Active</option>
+                                        <option value="Expired">Expired</option>
+                                        <option value="Expiring Soon">Expiring Soon</option>
+                                    </>
+                                )}
+                                {viewMode === 'safety' && (
+                                    <>
+                                        <option value="">All Drivers</option>
+                                        <option value="High">High Score (90+)</option>
+                                        <option value="Medium">Medium Score (80-89)</option>
+                                        <option value="Low">Low Score (&lt;80)</option>
+                                        <option value="Suspended">Suspended</option>
+                                    </>
+                                )}
+                                {viewMode === 'manage' && (
+                                    <>
+                                        <option value="">All Statuses</option>
+                                        <option value="Available">Available</option>
+                                        <option value="On Trip">On Trip</option>
+                                        <option value="Off Duty">Off Duty</option>
+                                        <option value="Suspended">Suspended</option>
+                                    </>
+                                )}
                             </select>
                         </div>
                     </div>
@@ -208,66 +249,151 @@ const Drivers = ({ token, userRole }) => {
                                 <thead>
                                     <tr>
                                         <th>Driver Name</th>
-                                        <th>License / Class</th>
-                                        <th>Expiry Date</th>
-                                        <th>Contact</th>
-                                        <th>Safety Score</th>
-                                        <th>Status</th>
-                                        <th style={{ textAlign: 'right' }}>Actions</th>
+                                        {viewMode === 'license' && (
+                                            <>
+                                                <th>License / Class</th>
+                                                <th>Expiry Date</th>
+                                                <th>Status</th>
+                                                <th style={{ textAlign: 'right' }}>Actions</th>
+                                            </>
+                                        )}
+                                        {viewMode === 'safety' && (
+                                            <>
+                                                <th>Contact</th>
+                                                <th>Safety Score</th>
+                                                <th>Status</th>
+                                                <th style={{ textAlign: 'right' }}>Actions</th>
+                                            </>
+                                        )}
+                                        {viewMode === 'manage' && (
+                                            <>
+                                                <th>License / Class</th>
+                                                <th>Expiry Date</th>
+                                                <th>Contact</th>
+                                                <th>Safety Score</th>
+                                                <th>Status</th>
+                                                <th style={{ textAlign: 'right' }}>Actions</th>
+                                            </>
+                                        )}
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {drivers.map((d) => {
                                         const expired = new Date(d.licenseExpiryDate) < new Date();
+                                        const expiringInDays = (new Date(d.licenseExpiryDate) - new Date()) / (1000 * 60 * 60 * 24);
+                                        
                                         return (
-                                            <tr key={d._id} style={expired ? { background: 'rgba(239, 68, 68, 0.02)' } : {}}>
+                                            <tr key={d._id} style={expired || (viewMode === 'license' && expiringInDays < 30) ? { background: 'rgba(239, 68, 68, 0.02)' } : {}}>
                                                 <td style={{ fontWeight: 'bold', color: '#fff' }}>{d.name}</td>
-                                                <td>
-                                                    <div>{d.licenseNumber}</div>
-                                                    <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{d.licenseCategory}</div>
-                                                </td>
-                                                <td style={expired ? { color: 'var(--danger)', fontWeight: 'bold' } : {}}>
-                                                    {new Date(d.licenseExpiryDate).toLocaleDateString()}
-                                                    {expired && ' (Expired)'}
-                                                </td>
-                                                <td>{d.contactNumber}</td>
-                                                <td style={{ width: '150px' }}>
-                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                                        <div className="bar-track" style={{ height: '8px', width: '80px', margin: 0 }}>
-                                                            <div
-                                                                className="bar-fill"
-                                                                style={{
-                                                                    width: `${d.safetyScore}%`,
-                                                                    backgroundColor: d.safetyScore >= 90 ? '#10b981' : d.safetyScore >= 80 ? '#fbbf24' : '#ef4444'
-                                                                }}
-                                                            ></div>
-                                                        </div>
-                                                        <span style={{ fontWeight: '600', fontSize: '0.85rem' }}>{d.safetyScore}</span>
-                                                    </div>
-                                                </td>
-                                                <td>
-                                                    <span className={`badge badge-${d.status.toLowerCase().replace(' ', '')}`}>
-                                                        {d.status}
-                                                    </span>
-                                                </td>
-                                                <td style={{ textAlign: 'right' }}>
-                                                    <button
-                                                        className="btn btn-secondary"
-                                                        onClick={() => openEditModal(d)}
-                                                        style={{ padding: '0.4rem 0.75rem', marginRight: '0.5rem', fontSize: '0.8rem' }}
-                                                    >
-                                                        ✏️ Edit
-                                                    </button>
-                                                    {userRole === 'Fleet Manager' && (
-                                                        <button
-                                                            className="btn btn-danger"
-                                                            onClick={() => handleDelete(d._id)}
-                                                            style={{ padding: '0.4rem 0.75rem', fontSize: '0.8rem' }}
-                                                        >
-                                                            🗑️ Delete
-                                                        </button>
-                                                    )}
-                                                </td>
+                                                {viewMode === 'license' && (
+                                                    <>
+                                                        <td>
+                                                            <div>{d.licenseNumber}</div>
+                                                            <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{d.licenseCategory}</div>
+                                                        </td>
+                                                        <td style={expired ? { color: 'var(--danger)', fontWeight: 'bold' } : {}}>
+                                                            {new Date(d.licenseExpiryDate).toLocaleDateString()}
+                                                            {expired && ' (Expired)'}{expiringInDays < 30 && expiringInDays >= 0 && ` (${Math.round(expiringInDays)} days)`}
+                                                        </td>
+                                                        <td>
+                                                            <span className={`badge ${expired ? 'badge-suspended' : expiringInDays < 30 ? 'badge-warning' : 'badge-success'}`}>
+                                                                {expired ? 'Expired' : expiringInDays < 30 ? 'Expiring Soon' : 'Active'}
+                                                            </span>
+                                                        </td>
+                                                        <td style={{ textAlign: 'right' }}>
+                                                            <button
+                                                                className="btn btn-secondary"
+                                                                onClick={() => openEditModal(d)}
+                                                                style={{ padding: '0.4rem 0.75rem', fontSize: '0.8rem' }}
+                                                            >
+                                                                ✏️ Renew
+                                                            </button>
+                                                        </td>
+                                                    </>
+                                                )}
+                                                {viewMode === 'safety' && (
+                                                    <>
+                                                        <td>{d.contactNumber}</td>
+                                                        <td style={{ width: '150px' }}>
+                                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                                                <div className="bar-track" style={{ height: '8px', width: '80px', margin: 0 }}>
+                                                                    <div
+                                                                        className="bar-fill"
+                                                                        style={{
+                                                                            width: `${d.safetyScore}%`,
+                                                                            backgroundColor: d.safetyScore >= 90 ? '#10b981' : d.safetyScore >= 80 ? '#fbbf24' : '#ef4444'
+                                                                        }}
+                                                                    ></div>
+                                                                </div>
+                                                                <span style={{ fontWeight: '600', fontSize: '0.85rem' }}>{d.safetyScore}</span>
+                                                            </div>
+                                                        </td>
+                                                        <td>
+                                                            <span className={`badge badge-${d.status.toLowerCase().replace(' ', '')}`}>
+                                                                {d.status}
+                                                            </span>
+                                                        </td>
+                                                        <td style={{ textAlign: 'right' }}>
+                                                            <button
+                                                                className="btn btn-secondary"
+                                                                onClick={() => openEditModal(d)}
+                                                                style={{ padding: '0.4rem 0.75rem', fontSize: '0.8rem' }}
+                                                            >
+                                                                ✏️ Update Score
+                                                            </button>
+                                                        </td>
+                                                    </>
+                                                )}
+                                                {viewMode === 'manage' && (
+                                                    <>
+                                                        <td>
+                                                            <div>{d.licenseNumber}</div>
+                                                            <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{d.licenseCategory}</div>
+                                                        </td>
+                                                        <td style={expired ? { color: 'var(--danger)', fontWeight: 'bold' } : {}}>
+                                                            {new Date(d.licenseExpiryDate).toLocaleDateString()}
+                                                            {expired && ' (Expired)'}
+                                                        </td>
+                                                        <td>{d.contactNumber}</td>
+                                                        <td style={{ width: '150px' }}>
+                                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                                                <div className="bar-track" style={{ height: '8px', width: '80px', margin: 0 }}>
+                                                                    <div
+                                                                        className="bar-fill"
+                                                                        style={{
+                                                                            width: `${d.safetyScore}%`,
+                                                                            backgroundColor: d.safetyScore >= 90 ? '#10b981' : d.safetyScore >= 80 ? '#fbbf24' : '#ef4444'
+                                                                        }}
+                                                                    ></div>
+                                                                </div>
+                                                                <span style={{ fontWeight: '600', fontSize: '0.85rem' }}>{d.safetyScore}</span>
+                                                            </div>
+                                                        </td>
+                                                        <td>
+                                                            <span className={`badge badge-${d.status.toLowerCase().replace(' ', '')}`}>
+                                                                {d.status}
+                                                            </span>
+                                                        </td>
+                                                        <td style={{ textAlign: 'right' }}>
+                                                            <button
+                                                                className="btn btn-secondary"
+                                                                onClick={() => openEditModal(d)}
+                                                                style={{ padding: '0.4rem 0.75rem', marginRight: '0.5rem', fontSize: '0.8rem' }}
+                                                            >
+                                                                ✏️ Edit
+                                                            </button>
+                                                            {userRole === 'Fleet Manager' && (
+                                                                <button
+                                                                    className="btn btn-danger"
+                                                                    onClick={() => handleDelete(d._id)}
+                                                                    style={{ padding: '0.4rem 0.75rem', fontSize: '0.8rem' }}
+                                                                >
+                                                                    🗑️ Delete
+                                                                </button>
+                                                            )}
+                                                        </td>
+                                                    </>
+                                                )}
                                             </tr>
                                         );
                                     })}
@@ -277,37 +403,39 @@ const Drivers = ({ token, userRole }) => {
                     )}
                 </div>
 
-                {/* Compliance Alerts Panel */}
-                <div className="glass-card" style={{ height: 'fit-content' }}>
-                    <h3 style={{ marginBottom: '1rem', fontSize: '1.05rem', color: '#fca5a5' }}>⚠️ Safety & License compliance</h3>
-                    {complianceIssues.length === 0 ? (
-                        <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', padding: '0.5rem' }}>
-                            ✅ All drivers are currently compliant and active.
-                        </div>
-                    ) : (
-                        <div className="compliance-list">
-                            {complianceIssues.map((d) => {
-                                const expired = new Date(d.licenseExpiryDate) < new Date();
-                                return (
-                                    <div key={d._id} className="compliance-item">
-                                        <div>
-                                            <div style={{ fontWeight: 'bold' }}>{d.name}</div>
-                                            <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
-                                                {expired ? `License expired: ${new Date(d.licenseExpiryDate).toLocaleDateString()}` : `Score: ${d.safetyScore}`}
+                {/* Compliance Alerts Panel - shown for manage and license views */}
+                {(viewMode === 'manage' || viewMode === 'license') && (
+                    <div className="glass-card" style={{ height: 'fit-content' }}>
+                        <h3 style={{ marginBottom: '1rem', fontSize: '1.05rem', color: '#fca5a5' }}>⚠️ Safety & License compliance</h3>
+                        {complianceIssues.length === 0 ? (
+                            <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', padding: '0.5rem' }}>
+                                ✅ All drivers are currently compliant and active.
+                            </div>
+                        ) : (
+                            <div className="compliance-list">
+                                {complianceIssues.map((d) => {
+                                    const expired = new Date(d.licenseExpiryDate) < new Date();
+                                    return (
+                                        <div key={d._id} className="compliance-item">
+                                            <div>
+                                                <div style={{ fontWeight: 'bold' }}>{d.name}</div>
+                                                <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
+                                                    {expired ? `License expired: ${new Date(d.licenseExpiryDate).toLocaleDateString()}` : `Score: ${d.safetyScore}`}
+                                                </div>
                                             </div>
+                                            <span
+                                                className="badge badge-suspended"
+                                                style={{ fontSize: '0.7rem' }}
+                                            >
+                                                {d.status === 'Suspended' ? 'Suspended' : expired ? 'Expired' : 'Safety Warning'}
+                                            </span>
                                         </div>
-                                        <span
-                                            className="badge badge-suspended"
-                                            style={{ fontSize: '0.7rem' }}
-                                        >
-                                            {d.status === 'Suspended' ? 'Suspended' : expired ? 'Expired' : 'Safety Warning'}
-                                        </span>
-                                    </div>
-                                );
-                            })}
-                        </div>
-                    )}
-                </div>
+                                    );
+                                })}
+                            </div>
+                        )}
+                    </div>
+                )}
 
             </div>
 

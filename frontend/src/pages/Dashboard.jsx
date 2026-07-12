@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-const Dashboard = ({ token }) => {
+const Dashboard = ({ token, userRole }) => {
     const [kpis, setKpis] = useState({
         activeVehicles: 0,
         availableVehicles: 0,
@@ -9,7 +9,13 @@ const Dashboard = ({ token }) => {
         activeTrips: 0,
         pendingTrips: 0,
         driversOnDuty: 0,
-        fleetUtilization: 0
+        fleetUtilization: 0,
+        totalDrivers: 0,
+        availableDrivers: 0,
+        driversOnTrip: 0,
+        expiredLicenses: 0,
+        suspendedDrivers: 0,
+        averageSafetyScore: 0
     });
 
     const [filterType, setFilterType] = useState('');
@@ -22,7 +28,9 @@ const Dashboard = ({ token }) => {
             setLoading(true);
             setError('');
             let url = '/api/reports/kpis';
-            if (filterType) url += `?type=${encodeURIComponent(filterType)}`;
+            if (filterType && userRole !== 'Safety Officer') {
+                url += `?type=${encodeURIComponent(filterType)}`;
+            }
 
             const response = await fetch(url, {
                 headers: {
@@ -41,31 +49,33 @@ const Dashboard = ({ token }) => {
 
     useEffect(() => {
         fetchKPIs();
-    }, [filterType]);
+    }, [filterType, userRole]);
 
     return (
         <div>
             <div className="dashboard-header">
                 <div className="header-title">
-                    <h1>Operations Dashboard</h1>
-                    <p>Real-time vehicle and worker dispatch metrics</p>
+                    <h1>{userRole === 'Safety Officer' ? 'Safety Dashboard' : 'Operations Dashboard'}</h1>
+                    <p>{userRole === 'Safety Officer' ? 'Driver safety, compliance, and licensing metrics' : 'Real-time vehicle and worker dispatch metrics'}</p>
                 </div>
 
-                {/* Filters */}
-                <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
-                    <span style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Filter Type:</span>
-                    <select
-                        className="form-control"
-                        style={{ width: '160px', padding: '0.5rem' }}
-                        value={filterType}
-                        onChange={(e) => setFilterType(e.target.value)}
-                    >
-                        <option value="">All Vehicles</option>
-                        <option value="Van">Vans</option>
-                        <option value="Truck">Trucks</option>
-                        <option value="Sedan">Sedans</option>
-                    </select>
-                </div>
+                {/* Filters - only show for non-Safety Officer roles */}
+                {userRole !== 'Safety Officer' && (
+                    <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+                        <span style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Filter Type:</span>
+                        <select
+                            className="form-control"
+                            style={{ width: '160px', padding: '0.5rem' }}
+                            value={filterType}
+                            onChange={(e) => setFilterType(e.target.value)}
+                        >
+                            <option value="">All Vehicles</option>
+                            <option value="Van">Vans</option>
+                            <option value="Truck">Trucks</option>
+                            <option value="Sedan">Sedans</option>
+                        </select>
+                    </div>
+                )}
             </div>
 
             {error && (
@@ -77,73 +87,128 @@ const Dashboard = ({ token }) => {
 
             {loading ? (
                 <div style={{ padding: '3rem', textAlign: 'center', color: 'var(--text-secondary)' }}>
-                    Loading Operational KPIs...
+                    Loading {userRole === 'Safety Officer' ? 'Safety' : 'Operational'} KPIs...
                 </div>
             ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem', marginTop: '1.5rem' }}>
 
-                    {/* KPI Cards Grid */}
-                    <div className="kpi-grid">
-                        <div className="glass-card kpi-card">
-                            <div className="kpi-icon-wrapper color-success">🚚</div>
-                            <div className="kpi-info">
-                                <span className="kpi-label">Active Vehicles</span>
-                                <span className="kpi-value">{kpis.activeVehicles}</span>
+                    {/* Safety Officer KPIs */}
+                    {userRole === 'Safety Officer' && (
+                        <div className="kpi-grid">
+                            <div className="glass-card kpi-card">
+                                <div className="kpi-icon-wrapper color-info">👨</div>
+                                <div className="kpi-info">
+                                    <span className="kpi-label">Total Drivers</span>
+                                    <span className="kpi-value">{kpis.totalDrivers}</span>
+                                </div>
+                            </div>
+
+                            <div className="glass-card kpi-card">
+                                <div className="kpi-icon-wrapper color-success">✅</div>
+                                <div className="kpi-info">
+                                    <span className="kpi-label">Available Drivers</span>
+                                    <span className="kpi-value">{kpis.availableDrivers}</span>
+                                </div>
+                            </div>
+
+                            <div className="glass-card kpi-card">
+                                <div className="kpi-icon-wrapper color-primary">🚛</div>
+                                <div className="kpi-info">
+                                    <span className="kpi-label">Drivers On Trip</span>
+                                    <span className="kpi-value">{kpis.driversOnTrip}</span>
+                                </div>
+                            </div>
+
+                            <div className="glass-card kpi-card">
+                                <div className="kpi-icon-wrapper color-warning">⚠️</div>
+                                <div className="kpi-info">
+                                    <span className="kpi-label">Expired Licenses</span>
+                                    <span className="kpi-value">{kpis.expiredLicenses}</span>
+                                </div>
+                            </div>
+
+                            <div className="glass-card kpi-card">
+                                <div className="kpi-icon-wrapper color-danger">🚫</div>
+                                <div className="kpi-info">
+                                    <span className="kpi-label">Suspended Drivers</span>
+                                    <span className="kpi-value">{kpis.suspendedDrivers}</span>
+                                </div>
+                            </div>
+
+                            <div className="glass-card kpi-card">
+                                <div className="kpi-icon-wrapper color-success">⭐</div>
+                                <div className="kpi-info">
+                                    <span className="kpi-label">Avg Safety Score</span>
+                                    <span className="kpi-value">{(kpis.averageSafetyScore || 0).toFixed(1)}</span>
+                                </div>
                             </div>
                         </div>
+                    )}
 
-                        <div className="glass-card kpi-card">
-                            <div className="kpi-icon-wrapper color-primary">✅</div>
-                            <div className="kpi-info">
-                                <span className="kpi-label">Available Vehicles</span>
-                                <span className="kpi-value">{kpis.availableVehicles}</span>
+                    {/* Fleet Manager / Default KPIs */}
+                    {userRole !== 'Safety Officer' && (
+                        <>
+                            <div className="kpi-grid">
+                                <div className="glass-card kpi-card">
+                                    <div className="kpi-icon-wrapper color-success">🚚</div>
+                                    <div className="kpi-info">
+                                        <span className="kpi-label">Active Vehicles</span>
+                                        <span className="kpi-value">{kpis.activeVehicles}</span>
+                                    </div>
+                                </div>
+
+                                <div className="glass-card kpi-card">
+                                    <div className="kpi-icon-wrapper color-primary">✅</div>
+                                    <div className="kpi-info">
+                                        <span className="kpi-label">Available Vehicles</span>
+                                        <span className="kpi-value">{kpis.availableVehicles}</span>
+                                    </div>
+                                </div>
+
+                                <div className="glass-card kpi-card">
+                                    <div className="kpi-icon-wrapper color-warning">🔧</div>
+                                    <div className="kpi-info">
+                                        <span className="kpi-label">In Maintenance</span>
+                                        <span className="kpi-value">{kpis.inShopVehicles}</span>
+                                    </div>
+                                </div>
+
+                                <div className="glass-card kpi-card">
+                                    <div className="kpi-icon-wrapper color-info">👥</div>
+                                    <div className="kpi-info">
+                                        <span className="kpi-label">Drivers On Duty</span>
+                                        <span className="kpi-value">{kpis.driversOnDuty}</span>
+                                    </div>
+                                </div>
                             </div>
-                        </div>
 
-                        <div className="glass-card kpi-card">
-                            <div className="kpi-icon-wrapper color-warning">🔧</div>
-                            <div className="kpi-info">
-                                <span className="kpi-label">In Maintenance</span>
-                                <span className="kpi-value">{kpis.inShopVehicles}</span>
+                            <div className="kpi-grid">
+                                <div className="glass-card kpi-card">
+                                    <div className="kpi-icon-wrapper color-primary">🗺️</div>
+                                    <div className="kpi-info">
+                                        <span className="kpi-label">Active Trips</span>
+                                        <span className="kpi-value">{kpis.activeTrips}</span>
+                                    </div>
+                                </div>
+
+                                <div className="glass-card kpi-card">
+                                    <div className="kpi-icon-wrapper color-warning">⏳</div>
+                                    <div className="kpi-info">
+                                        <span className="kpi-label">Pending Trips</span>
+                                        <span className="kpi-value">{kpis.pendingTrips}</span>
+                                    </div>
+                                </div>
+
+                                <div className="glass-card kpi-card">
+                                    <div className="kpi-icon-wrapper color-info">📊</div>
+                                    <div className="kpi-info">
+                                        <span className="kpi-label">Fleet Utilization</span>
+                                        <span className="kpi-value">{kpis.fleetUtilization}%</span>
+                                    </div>
+                                </div>
                             </div>
-                        </div>
-
-                        <div className="glass-card kpi-card">
-                            <div className="kpi-icon-wrapper color-info">👥</div>
-                            <div className="kpi-info">
-                                <span className="kpi-label">Drivers On Duty</span>
-                                <span className="kpi-value">{kpis.driversOnDuty}</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="kpi-grid">
-                        <div className="glass-card kpi-card">
-                            <div className="kpi-icon-wrapper color-primary">🗺️</div>
-                            <div className="kpi-info">
-                                <span className="kpi-label">Active Trips</span>
-                                <span className="kpi-value">{kpis.activeTrips}</span>
-                            </div>
-                        </div>
-
-                        <div className="glass-card kpi-card">
-                            <div className="kpi-icon-wrapper color-warning">⏳</div>
-                            <div className="kpi-info">
-                                <span className="kpi-label">Pending Trips</span>
-                                <span className="kpi-value">{kpis.pendingTrips}</span>
-                            </div>
-                        </div>
-
-                        <div className="glass-card kpi-card">
-                            <div className="kpi-icon-wrapper color-info">📊</div>
-                            <div className="kpi-info">
-                                <span className="kpi-label">Fleet Utilization</span>
-                                <span className="kpi-value">{kpis.fleetUtilization}%</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Visual Analytics */}
+                        </>
+                    )}
                     <div className="dashboard-layout">
                         <div className="glass-card">
                             <h3 style={{ marginBottom: '1.5rem', fontSize: '1.1rem' }}>Fleet Utilization & Asset Allocation</h3>

@@ -51,9 +51,9 @@ function App() {
 
                     // Set initial tab based on role
                     if (userData.role === 'Driver') {
-                        setActiveTab('trips');
+                        setActiveTab('trips-manage');
                     } else if (userData.role === 'Safety Officer') {
-                        setActiveTab('drivers');
+                        setActiveTab('drivers-manage');
                     } else if (userData.role === 'Financial Analyst') {
                         setActiveTab('expenses');
                     } else {
@@ -79,9 +79,9 @@ function App() {
         setUser(user);
 
         if (user.role === 'Driver') {
-            setActiveTab('trips');
+            setActiveTab('trips-manage');
         } else if (user.role === 'Safety Officer') {
-            setActiveTab('drivers');
+            setActiveTab('drivers-manage');
         } else if (user.role === 'Financial Analyst') {
             setActiveTab('expenses');
         } else {
@@ -139,14 +139,20 @@ function App() {
     const renderContent = () => {
         const fleetManagerAllowedTabs = ['dashboard', 'vehicles', 'maintenance', 'reports'];
         if (user.role === 'Fleet Manager' && !fleetManagerAllowedTabs.includes(activeTab)) {
-            return <Dashboard token={token} />;
+            return <Dashboard token={token} userRole={user.role} />;
         }
 
         switch (activeTab) {
             case 'dashboard':
-                return <Dashboard token={token} />;
+                return <Dashboard token={token} userRole={user.role} />;
             case 'vehicles':
                 return <Vehicles token={token} />;
+            case 'drivers-manage':
+                return <Drivers token={token} userRole={user.role} initialView="manage" />;
+            case 'drivers-license':
+                return <Drivers token={token} userRole={user.role} initialView="license" />;
+            case 'drivers-safety':
+                return <Drivers token={token} userRole={user.role} initialView="safety" />;
             case 'drivers':
                 return <Drivers token={token} userRole={user.role} />;
             case 'trips-manage':
@@ -164,7 +170,7 @@ function App() {
             case 'reports':
                 return <Reports token={token} />;
             default:
-                return <Dashboard token={token} />;
+                return <Dashboard token={token} userRole={user.role} />;
         }
     };
 

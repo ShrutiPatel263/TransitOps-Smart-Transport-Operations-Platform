@@ -5,7 +5,9 @@ const Sidebar = ({ activeTab, setActiveTab, user, onLogout }) => {
     const menuItems = [
         { id: 'dashboard', name: 'Dashboard', icon: '📊', roles: ['Fleet Manager', 'Driver', 'Safety Officer', 'Financial Analyst'] },
         { id: 'vehicles', name: 'Vehicles', icon: '🚚', roles: ['Fleet Manager'] },
-        { id: 'drivers', name: 'Drivers', icon: '👤', roles: ['Safety Officer'] },
+        { id: 'drivers-manage', name: 'Driver Management', icon: '👤', roles: ['Safety Officer'] },
+        { id: 'drivers-license', name: 'License Tracking', icon: '📋', roles: ['Safety Officer'] },
+        { id: 'drivers-safety', name: 'Safety Reports', icon: '⭐', roles: ['Safety Officer'] },
         { id: 'trips-manage', name: 'Trip Management', icon: '🗺️', roles: ['Driver'] },
         { id: 'trips-dispatch', name: 'Dispatch', icon: '🚚', roles: ['Driver'] },
         { id: 'trips-active', name: 'Active Trips', icon: '✅', roles: ['Driver'] },
