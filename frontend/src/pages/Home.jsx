@@ -128,7 +128,7 @@ export default function Home({ onNavigate, theme, onToggleTheme }) {
 
             {/* ── Hero ── */}
             <section className="hero-section">
-                <div className="hero-badge">🚀 v2.0 — Now with Live ROI Tracking</div>
+                {/* <div className="hero-badge">🚀 v2.0 — Now with Live ROI Tracking</div> */}
                 <h1 className="hero-heading">
                     Digitize your<br />
                     <span className="hero-typed">{typed}<span className="cursor">|</span>
