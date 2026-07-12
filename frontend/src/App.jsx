@@ -11,6 +11,7 @@ import Expenses from './pages/Expenses';
 import Reports from './pages/Reports';
 import './index.css';
 
+
 function App() {
     const [token, setToken] = useState(localStorage.getItem('transitops_token') || null);
     const [user, setUser] = useState(null);
@@ -19,6 +20,17 @@ function App() {
 
     // Unauthenticated view routing: 'home', 'login', or 'signup'
     const [view, setView] = useState('home');
+    const [theme, setTheme] = useState(localStorage.getItem('transitops_theme') || 'dark');
+
+    useEffect(() => {
+        const root = document.documentElement;
+        if (theme === 'light') {
+            root.classList.add('light-mode');
+        } else {
+            root.classList.remove('light-mode');
+        }
+        localStorage.setItem('transitops_theme', theme);
+    }, [theme]);
 
     // Validate session token / fetch profile on mount
     useEffect(() => {
@@ -114,7 +126,13 @@ function App() {
                 />
             );
         }
-        return <Home onNavigate={(target) => setView(target)} />;
+        return (
+            <Home
+                onNavigate={(target) => setView(target)}
+                theme={theme}
+                onToggleTheme={() => setTheme(theme === 'light' ? 'dark' : 'light')}
+            />
+        );
     }
 
     // Render correct page client-side based on activeTab state for authenticated users
@@ -155,6 +173,13 @@ function App() {
                     <div className="navbar-search">
                         <span style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>📍 Smart Transport Operations System</span>
                     </div>
+                    <button
+                        className="theme-toggle-button"
+                        onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
+                        type="button"
+                    >
+                        {theme === 'light' ? '🌙 Dark Mode' : '☀️ Light Mode'}
+                    </button>
                     <div className="navbar-user-tag">
                         <span className="dot dot-success animate-pulse"></span>
                         <span style={{ fontSize: '0.85rem', fontWeight: '500' }}>

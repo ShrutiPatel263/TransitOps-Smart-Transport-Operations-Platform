@@ -94,7 +94,7 @@ const roles = [
 /* ───── Marquee items ───── */
 const ticker = ['Vehicle Registry', 'Trip Dispatching', 'Driver Compliance', 'Maintenance Sync', 'Fuel Tracking', 'Expense Ledger', 'ROI Analytics', 'CSV Export', 'Role-Based Access', 'Smart KPI Dashboard'];
 
-export default function Home({ onNavigate }) {
+export default function Home({ onNavigate, theme, onToggleTheme }) {
     const typed = useTypewriter(['Fleet Operations', 'Driver Compliance', 'Fuel Analytics', 'Trip Dispatches', 'ROI Management'], 80, 2000);
 
     return (
@@ -120,6 +120,9 @@ export default function Home({ onNavigate }) {
                 <div className="landing-nav-actions">
                     <button className="btn-ghost" onClick={() => onNavigate('login')}>Sign In</button>
                     <button className="btn btn-primary" onClick={() => onNavigate('signup')}>Get Started →</button>
+                    <button className="btn-ghost theme-toggle-home" onClick={onToggleTheme}>
+                        {theme === 'light' ? '🌙 Dark Mode' : '☀️ Light Mode'}
+                    </button>
                 </div>
             </header>
 
