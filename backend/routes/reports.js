@@ -32,6 +32,28 @@ router.get('/kpis', protect, async (req, res) => {
                 ? drivers.reduce((sum, d) => sum + (d.safetyScore || 0), 0) / drivers.length
                 : 0;
 
+            const vehicles = await Vehicle.find();
+            let activeVehicles = 0;
+            let availableVehicles = 0;
+            let inShopVehicles = 0;
+
+            vehicles.forEach(v => {
+                if (v.status === 'On Trip') activeVehicles++;
+                else if (v.status === 'Available') availableVehicles++;
+                else if (v.status === 'In Shop') inShopVehicles++;
+            });
+
+            const activeTrips = await Trip.countDocuments({ status: 'Dispatched' });
+            const pendingTrips = await Trip.countDocuments({ status: 'Draft' });
+            const driversOnDuty = await Driver.countDocuments({
+                status: { $in: ['Available', 'On Trip'] }
+            });
+
+            const totalActiveVehicles = activeVehicles + availableVehicles + inShopVehicles;
+            const fleetUtilization = totalActiveVehicles > 0
+                ? Math.round((activeVehicles / totalActiveVehicles) * 100)
+                : 0;
+
             return res.json({
                 totalDrivers,
                 availableDrivers,
@@ -39,14 +61,13 @@ router.get('/kpis', protect, async (req, res) => {
                 expiredLicenses,
                 suspendedDrivers,
                 averageSafetyScore,
-                // Include default fleet metrics too for consistency
-                activeVehicles: 0,
-                availableVehicles: 0,
-                inShopVehicles: 0,
-                activeTrips: 0,
-                pendingTrips: 0,
-                driversOnDuty: 0,
-                fleetUtilization: 0
+                activeVehicles,
+                availableVehicles,
+                inShopVehicles,
+                activeTrips,
+                pendingTrips,
+                driversOnDuty,
+                fleetUtilization
             });
         }
         
